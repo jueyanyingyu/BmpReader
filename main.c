@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <malloc.h>
 #include <windows.h>
 #include <math.h>
 #define FALSE 0
@@ -10,8 +11,18 @@ char ch[]="MWNB8527|i\";+-. ";
 int tod(BYTE);
 int toturn(int,RGBQUAD*,FILE*);
 int main(int argc, char *argv[]) {
+	char* str;
+	int i=0;
+	str=(char*)malloc(sizeof(char)*1);
+	while('\n'!=(str[i]=getchar())) {
+		i++;
+		str=(char*)realloc(str,sizeof(char)*(i+1));
+	}
+	str[i]='\0';
+	printf("%s\n",str);
     FILE* fpwrite=fopen("write.txt","w");
-    FILE *fp=fopen("toread.bmp","rb");
+    FILE *fp=fopen(str,"rb");
+    free(str);
     if (fp==NULL) {
         printf("open error!");
         return FALSE;
