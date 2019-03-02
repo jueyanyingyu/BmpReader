@@ -5,8 +5,10 @@
 #include <math.h>
 #define FALSE 0
 #define TRUE 1
+#pragma pack(4)
 
-char ch[]="MWNB8527|i\";+-. ";
+char ch1[]="WNB8b271=\";-,_. ";
+char ch2[]=" .:-^\"=!259b8BNW";
 
 int tod(BYTE);
 int toturn(int,RGBQUAD*,FILE*);
@@ -20,91 +22,99 @@ int main(int argc, char *argv[]) {
 	}
 	str[i]='\0';
 	printf("%s\n",str);
-    FILE* fpwrite=fopen("write.txt","w");
-    FILE *fp=fopen(str,"rb");
-    free(str);
-    if (fp==NULL) {
-        printf("open error!");
-        return FALSE;
-    } else {
-        int bmpWidth;
-        int bmpHeight;
-        int biBitCount;
-        RGBQUAD* pColorTable;
-        char* pBmpdata;
-        fseek(fp,sizeof(BITMAPFILEHEADER),0);//跳过文件头
-        BITMAPINFOHEADER head;
-        fread(&head,sizeof(BITMAPINFOHEADER),1,fp);//读取信息头
-        bmpWidth=head.biWidth;
-        bmpHeight=head.biHeight;
-        biBitCount=head.biBitCount;
-        if (biBitCount==8) {//判断位深
-            int length;
-            if (bmpWidth%4!=0) {
-                length=(bmpWidth/4+1)*4;
-            } else {
-                length=bmpWidth;
-            }
-            pColorTable=(RGBQUAD*)malloc(256*sizeof(RGBQUAD));
-            fread(pColorTable,256*sizeof(RGBQUAD),1,fp);
-            pBmpdata=(BYTE*)malloc(length*bmpHeight);
-            fread(pBmpdata,length*bmpHeight,1,fp);
-            fclose(fp);
-            for (int i=bmpHeight-1; i>=0; i--) {
-                for (int j=0; j<bmpWidth; j++) {
-                    toturn(tod(*(pBmpdata+j+i*length)),pColorTable,fpwrite);
-                }
-                fprintf(fpwrite,"\n");
-            }
-            fclose(fpwrite);
-            free(pColorTable);
-            free(pBmpdata);
-            return TRUE;
-        }
-		if (biBitCount==1) {
-            fseek(fp,8,1);
-            int length;
-            if ((bmpWidth/8)%4!=0) {
-                length=((bmpWidth/8)/4+1)*4;
-            } else {
-                length=(bmpWidth/8);
-            }
-            int bmplength=(bmpWidth-1)/8+1;
-            char *pBmpBuf;
-            pBmpBuf=(char*)malloc(length*bmpHeight);
-            fread(pBmpBuf,1,length*bmpHeight,fp);
-            fclose(fp);
-            for (int i=bmpHeight-1; i>=0; i--) {
-                for (int j=0; j<bmplength; j++) {
-                    for (int k=0; k<8; k++) {
-                        if ((j+1)*8+k+1>bmpWidth) {
-                            break;
-                        } else {
-                            if((int)(((*(pBmpBuf+i*length+j))&(0x1<<(7-k)))>>(7-k))==1) {
-                                fprintf(fpwrite,"M");
-                            } else {
-                                fprintf(fpwrite," ");
-                            }
-                        }
-                    }
+	FILE* fpwrite=fopen("write.txt","w");
+	FILE *fp=fopen(str,"rb");
+	free(str);
+	if (fp==NULL) {
+		printf("open error!");
+		return FALSE;
+	} else {
+		int bmpWidth;
+		int bmpHeight;
+		int biBitCount;
+		RGBQUAD* pColorTable;
+		char* pBmpdata;
+		fseek(fp,sizeof(BITMAPFILEHEADER),0);//跳过文件头
+		BITMAPINFOHEADER head;
+		fread(&head,sizeof(BITMAPINFOHEADER),1,fp);//读取信息头
+		bmpWidth=head.biWidth;
+		bmpHeight=head.biHeight;
+		biBitCount=head.biBitCount;
+		system("cls");
+		if (biBitCount==8) {//判断位深
+			int length;
+			if (bmpWidth%4!=0) {
+				length=(bmpWidth/4+1)*4;
+			} else {
+				length=bmpWidth;
+			}
+			pColorTable=(RGBQUAD*)malloc(256*sizeof(RGBQUAD));
+			fread(pColorTable,256*sizeof(RGBQUAD),1,fp);
+			pBmpdata=(BYTE*)malloc(length*bmpHeight);
+			fread(pBmpdata,length*bmpHeight,1,fp);
+			fclose(fp);
+			for (int i=bmpHeight-1; i>=0; i--) {
+				for (int j=0; j<bmpWidth; j++) {
+					toturn(tod(*(pBmpdata+j+i*length)),pColorTable,fpwrite);
+				}
+				printf("\n");
+				fprintf(fpwrite,"\n");
+			}
+			fclose(fpwrite);
+			free(pColorTable);
+			free(pBmpdata);
+			return TRUE;
+		} else if (biBitCount==1) {
+			fseek(fp,8,1);
+			int length;
+			if ((bmpWidth/8)%4!=0) {
+				length=((bmpWidth/8)/4+1)*4;
+			} else {
+				length=(bmpWidth/8);
+			}
+			int bmplength=(bmpWidth-1)/8+1;
+			char *pBmpBuf;
+			pBmpBuf=(char*)malloc(length*bmpHeight);
+			fread(pBmpBuf,1,length*bmpHeight,fp);
+			fclose(fp);
+			for (int i=bmpHeight-1; i>=0; i--) {
+				for (int j=0; j<bmplength; j++) {
+					for (int k=0; k<8; k++) {
+						if ((j+1)*8+k+1>bmpWidth) {
+							break;
+						} else {
+							if((int)(((*(pBmpBuf+i*length+j))&(0x1<<(7-k)))>>(7-k))==1) {
+								printf("M");
+								fprintf(fpwrite,"M");
+							} else {
+								fprintf(fpwrite," ");
+								printf(" ");
+							}
+						}
+					}
 
-                }
-                fprintf(fpwrite,"\n");
-            }
-        } else  {
-        fprintf(fpwrite,"type error!");
-        return FALSE;
-    }
-}
+				}
+				printf("\n");
+				fprintf(fpwrite,"\n");
+			}
+		} else  {
+			fprintf(fpwrite,"type error!");
+			return FALSE;
+		}
+	}
+	getchar();
+	getchar();
+	return TRUE;
 }
 int tod(BYTE n) {
-    int sum=0;
-    for (int k=0; k<8; k++) {
-        sum+=(int)pow(2,k)*(int)(n&(0x1<<(7-k)))>>(7-k);
-    }
-    return sum;
+	int sum=0;
+	for (int k=0; k<8; k++) {
+		sum+=(int)pow(2,k)*(int)(n&(0x1<<(7-k)))>>(7-k);
+	}
+	return sum;
 }
 int toturn(int n,RGBQUAD* p,FILE* fpwrite) {
-    int gray=tod((*(p+n)).rgbGreen);
-    fprintf(fpwrite,"%c",*(ch+gray*gray/4335));
+	int gray=tod((*(p+n)).rgbGreen);
+	fprintf(fpwrite,"%c",*(ch1+(int)ceil(pow(gray+1,1.5)/256)-1));
+	printf("%c",*(ch2+(int)ceil(pow(gray+1,1.5)/256)-1));
 }
